@@ -1,4 +1,5 @@
 var convert = require('color-convert');
+var fs = require('fs');
 
 if (process.argv) {
     var Canvas = (require)('canvas');
@@ -12,6 +13,20 @@ function createCanvas (width, height) {
         var canvas = document.createElement('canvas');
         canvas.setAttribute('width', width);
         canvas.setAttribute('height', height);
+        // var ctx = canvas.getContext('2d');
+
+        // fs.readFile(__dirname + '/base.png', function(err, data) {
+        //   if (err) throw err;
+        //   var img = new Canvas.Image; // Create a new Image
+        //   img.src = data;
+
+        //   // Initialiaze a new Canvas with the same dimensions
+        //   // as the image, and get a 2D drawing context for it.
+        //   var ctx = canvas.getContext('2d');
+        //   ctx.drawImage(img, 0, 0, img.width / 4, img.height / 4);
+        // });
+
+
         return canvas;
     }
 }
@@ -51,6 +66,20 @@ function Heat (canvas, opts) {
     this.radius = opts.radius || 20;
     this.threshold = opts.threshold || 0;
     this.scalar = { x : 1, y : 1 };
+
+    var ctx = canvas.getContext('2d');
+
+    fs.readFile(__dirname + '/base.png', function(err, data) {
+      if (err) throw err;
+      var img = new Canvas.Image; // Create a new Image
+      img.src = data;
+      console.log('stuff askjsadkjhasd');
+
+      // Initialiaze a new Canvas with the same dimensions
+      // as the image, and get a 2D drawing context for it.
+      ctx.drawImage(img, 0, 0, img.width / 4, img.height / 4);
+    });
+
 }
 
 Heat.prototype.scale = function (x, y) {
@@ -119,3 +148,49 @@ Heat.prototype.draw = function () {
     
     return this;
 };
+
+
+Heat.prototype.draw2 = function() {
+  var that = this;
+return new Promise(function(fulfill, reject){
+  fs.readFile(__dirname + '/base.png', function(err, data) {
+    if (err) reject(err);
+      var width = that.canvas.width;
+      var height = that.canvas.height;
+      var ctx = that.alphaCanvas.getContext('2d');
+      var img = new Canvas.Image;
+      img.src = data;
+
+
+      that.canvas.getContext('2d').drawImage(img,0,0,img.width,img.height);
+      
+      var values = ctx.getImageData(0, 0, that.width, that.height);
+      var heat = ctx.createImageData(width, height);
+
+      for (var hy = 0; hy < height; hy++) {
+          var vy = Math.floor(hy / that.scalar.y);    
+          
+          for (var hx = 0; hx < width; hx++) {
+              var vx = Math.floor(hx / that.scalar.x);
+              var vi = 4 * (vy * that.width + vx);
+              var hi = 4 * (hy * width + hx);
+              
+              var v = values.data[vi + 3];
+              if (v > that.threshold) {
+                  var theta = (1 - v / 255) * 270;
+                  var rgb = convert.hsl2rgb(theta, 100, 50);
+                  heat.data[hi] = rgb[0];
+                  heat.data[hi+1] = rgb[1];
+                  heat.data[hi+2] = rgb[2];
+                  heat.data[hi+3] = v;
+              }
+          }
+      }
+      
+      that.canvas.getContext('2d').globalCompositeOperation = 'destination-over';
+      that.canvas.getContext('2d').putImageData(heat, 0, 0);
+      that.canvas.getContext('2d').drawImage(img,0,0,img.width,img.height);
+      fulfill(that);
+  });
+});
+}
