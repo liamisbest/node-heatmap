@@ -39,7 +39,7 @@ var exports = module.exports = function (canvas) {
         opts = arguments[2] || {};
     }
     else if (!canvas) {
-        canvas = createCanvas(500, 500);
+        canvas = createCanvas(464, 464);
     }
     else if (Object.getPrototypeOf(canvas) === Object.prototype) {
         opts = canvas;
