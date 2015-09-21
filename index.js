@@ -149,8 +149,60 @@ Heat.prototype.draw = function () {
     return this;
 };
 
+// var prodPoints = [
+//   {x: 77.155172414, y: 75.646551724, sA: 0, eA: 0},
+//   {x: 84.913793103, y: 40.301724138, sA: 0, eA: 0},
+//   {x: 65.086206897, y: 17.025862069, sA: 0, eA: 0},
+//   {x: 34.482758621, y: 17.24137931, sA: 0, eA: 0},
+//   {x: 14.655172414, y: 40.517241379, sA: 0, eA: 0},
+//   {x: 14.655172414, y: 63.362068966, sA: 0, eA: 0},
+//   {x: 28.232758621, y: 80.603448276, sA: 0, eA: 0}
+// ];
+var prodPoints = [{
+	diameter: 120,
+	midX: 319,
+	midY: 308,
+	usePoint: {x: 358, y: 350}
+},
+{
+	diameter: 121,
+	midX: 341,
+	midY: 207,
+	usePoint: {x: 395, y: 190}
+},
+{
+	diameter: 118,
+	midX: 283,
+	midY: 132,
+	usePoint: {x: 303, y: 79}
+},
+{
+	diameter: 118,
+	midX: 178,
+	midY: 132,
+	usePoint: {x: 158, y: 80}
+},
+{
+	diameter: 106,
+	midX: 114,
+	midY: 203,
+	usePoint: {x: 66, y: 188}
+},
+{
+	diameter: 106,
+	midX: 117,
+	midY: 283,
+	usePoint: {x: 69, y: 296}
+},
+{
+	diameter: 106,
+	midX: 154,
+	midY: 331,
+	usePoint: {x: 130, y: 376}
+}];
 
-Heat.prototype.draw2 = function() {
+
+Heat.prototype.draw2 = function(userData) {
   var that = this;
 return new Promise(function(fulfill, reject){
   fs.readFile(__dirname + '/base.png', function(err, data) {
@@ -161,8 +213,19 @@ return new Promise(function(fulfill, reject){
       var img = new Canvas.Image;
       img.src = data;
 
-
       that.canvas.getContext('2d').drawImage(img,0,0,img.width,img.height);
+
+      for (var i++; i < 7; i++) {
+        var pt = prodPoints[i];
+        ctx.beginPath();
+        ctx.moveTo(pt.midX, pt.midY);
+        //begin = start Angle
+        //end = end Angle
+        ctx.arc(pt.midX, pt.midY, pt.diameter, 0, 359);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
       
       var values = ctx.getImageData(0, 0, that.width, that.height);
       var heat = ctx.createImageData(width, height);
