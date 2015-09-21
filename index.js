@@ -159,52 +159,52 @@ Heat.prototype.draw = function () {
 //   {x: 28.232758621, y: 80.603448276, sA: 0, eA: 0}
 // ];
 var prodPoints = [{
-	diameter: 120,
-	midX: 319,
-	midY: 308,
+	diameter: 131,
+	midX: 302,
+	midY: 292,
 	usePoint: {x: 358, y: 350}
 },
 {
-	diameter: 121,
-	midX: 341,
-	midY: 207,
+	diameter: 133,
+	midX: 320,
+	midY: 212,
 	usePoint: {x: 395, y: 190}
 },
 {
-	diameter: 118,
-	midX: 283,
-	midY: 132,
+	diameter: 129,
+	midX: 276,
+	midY: 146,
 	usePoint: {x: 303, y: 79}
 },
 {
-	diameter: 118,
-	midX: 178,
-	midY: 132,
+	diameter: 124,
+	midX: 189,
+	midY: 146,
 	usePoint: {x: 158, y: 80}
 },
 {
-	diameter: 106,
-	midX: 114,
-	midY: 203,
+	diameter: 128,
+	midX: 138,
+	midY: 211,
 	usePoint: {x: 66, y: 188}
 },
 {
-	diameter: 106,
-	midX: 117,
-	midY: 283,
+	diameter: 127,
+	midX: 138,
+	midY: 282,
 	usePoint: {x: 69, y: 296}
 },
 {
-	diameter: 106,
-	midX: 154,
-	midY: 331,
+	diameter: 126,
+	midX: 202,
+	midY: 338,
 	usePoint: {x: 130, y: 376}
 }];
 
-
-Heat.prototype.draw2 = function(userData) {
+Heat.prototype.draw2 = function(inp) {
   var that = this;
 return new Promise(function(fulfill, reject){
+  var user = inp.user;
   fs.readFile(__dirname + '/base.png', function(err, data) {
     if (err) reject(err);
       var width = that.canvas.width;
@@ -215,16 +215,40 @@ return new Promise(function(fulfill, reject){
 
       that.canvas.getContext('2d').drawImage(img,0,0,img.width,img.height);
 
-      for (var i++; i < 7; i++) {
+      var startAngle = 0;
+      var endAngle = 359;
+
+      console.log('\n\n\n');
+      console.log(user);
+
+      var userProds = JSON.parse(inp.data.physicalIndicators);
+
+      console.log(userProds);
+
+      console.log('\n\n\n');
+
+
+      for (var i = 0; i < prodPoints.length; i++) {
         var pt = prodPoints[i];
-        ctx.beginPath();
-        ctx.moveTo(pt.midX, pt.midY);
-        //begin = start Angle
-        //end = end Angle
-        ctx.arc(pt.midX, pt.midY, pt.diameter, 0, 359);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
+
+        var radius = pt.diameter/2;
+
+        // Add random points of data
+        // TODO: This data will be based on Dwell - interaction
+        var randLen = Math.abs(userProds[i+1].dwell);
+        for (var k = 0; k < randLen; k++) {
+          var randAngle  = startAngle + Math.random()*( endAngle - startAngle );
+          var randRadius = Math.random()*radius;
+
+          var randX = pt.midX + randRadius * Math.cos(randAngle);
+          var randY = pt.midY + randRadius * Math.sin(randAngle);
+
+          that.addPoint(randX,randY,{weight:0.15, radius: 40});
+        }
+
+        for (var a = 0; a < userProds[i+1].interaction; a++) {
+          that.addPoint(pt.usePoint.x, pt.usePoint.y, { weight: 0.125, radius: 60 });
+        }
       }
       
       var values = ctx.getImageData(0, 0, that.width, that.height);
