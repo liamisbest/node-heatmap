@@ -251,7 +251,7 @@ return new Promise(function(fulfill, reject){
         var pX = jBounds.left + (jBounds.width * j.x);
         var pY = jBounds.top + (jBounds.height * j.y);
 
-        that.addPoint(pX, pY, { weight: 0.15, radius: 40 });
+        that.addPoint(pX, pY, { weight: 0.05, radius: 40 });
       }
       
 
