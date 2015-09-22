@@ -73,7 +73,7 @@ function Heat (canvas, opts) {
       if (err) throw err;
       var img = new Canvas.Image; // Create a new Image
       img.src = data;
-      console.log('stuff askjsadkjhasd');
+      // console.log('stuff askjsadkjhasd');
 
       // Initialiaze a new Canvas with the same dimensions
       // as the image, and get a 2D drawing context for it.
@@ -149,15 +149,6 @@ Heat.prototype.draw = function () {
     return this;
 };
 
-// var prodPoints = [
-//   {x: 77.155172414, y: 75.646551724, sA: 0, eA: 0},
-//   {x: 84.913793103, y: 40.301724138, sA: 0, eA: 0},
-//   {x: 65.086206897, y: 17.025862069, sA: 0, eA: 0},
-//   {x: 34.482758621, y: 17.24137931, sA: 0, eA: 0},
-//   {x: 14.655172414, y: 40.517241379, sA: 0, eA: 0},
-//   {x: 14.655172414, y: 63.362068966, sA: 0, eA: 0},
-//   {x: 28.232758621, y: 80.603448276, sA: 0, eA: 0}
-// ];
 var prodPoints = [{
 	diameter: 131,
 	midX: 302,
@@ -201,6 +192,13 @@ var prodPoints = [{
 	usePoint: {x: 130, y: 376}
 }];
 
+var jBounds = {
+  top: 133,
+  left: 133,
+  width: 193,
+  height: 193
+};
+
 Heat.prototype.draw2 = function(inp) {
   var that = this;
 return new Promise(function(fulfill, reject){
@@ -218,24 +216,17 @@ return new Promise(function(fulfill, reject){
       var startAngle = 0;
       var endAngle = 359;
 
-      console.log('\n\n\n');
-      console.log(user);
-
       var userProds = JSON.parse(inp.data.physicalIndicators);
-
-      console.log(userProds);
-
-      console.log('\n\n\n');
-
 
       for (var i = 0; i < prodPoints.length; i++) {
         var pt = prodPoints[i];
 
         var radius = pt.diameter/2;
 
+        // DWELL
         // Add random points of data
-        // TODO: This data will be based on Dwell - interaction
         var randLen = Math.abs(userProds[i+1].dwell);
+
         for (var k = 0; k < randLen; k++) {
           var randAngle  = startAngle + Math.random()*( endAngle - startAngle );
           var randRadius = Math.random()*radius;
@@ -246,11 +237,25 @@ return new Promise(function(fulfill, reject){
           that.addPoint(randX,randY,{weight:0.15, radius: 40});
         }
 
+        // INTERACTION
         for (var a = 0; a < userProds[i+1].interaction; a++) {
           that.addPoint(pt.usePoint.x, pt.usePoint.y, { weight: 0.125, radius: 60 });
         }
+
+      }
+
+      // JOURNEY
+      for (var f = 0; f < inp.user.Journeys.length; f++){
+        var j = inp.user.Journeys[f];
+        
+        var pX = jBounds.left + (jBounds.width * j.x);
+        var pY = jBounds.top + (jBounds.height * j.y);
+
+        that.addPoint(pX, pY, { weight: 0.15, radius: 40 });
       }
       
+
+      // Convert points to heat blobs
       var values = ctx.getImageData(0, 0, that.width, that.height);
       var heat = ctx.createImageData(width, height);
 
@@ -278,6 +283,7 @@ return new Promise(function(fulfill, reject){
       that.canvas.getContext('2d').putImageData(heat, 0, 0);
       that.canvas.getContext('2d').drawImage(img,0,0,img.width,img.height);
       fulfill(that);
+      that = null;
   });
 });
 }
